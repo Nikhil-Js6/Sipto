@@ -28,7 +28,7 @@ class AuthController {
 
             const otp = crypto.randomInt(1000, 9999);
 
-            const token = jwt.sign({ otp }, process.env.JWT_SECRET, { expiresIn: '100h' });
+            const token = jwt.sign({ otp }, process.env.JWT_SECRET, { expiresIn: '10min' });
 
             const params = {
                 PhoneNumber: phone,
@@ -64,33 +64,15 @@ class AuthController {
                     message: 'OTP expired. Please try again!',
                 });
             }
+            
             const { otp } = user;
+            
             if (otp !== +userOtp) {
                 return res.status(400).json({
                     message: 'Please enter the correct OTP',
-                    otp, userOtp
                 });
             }
             res.json('OTP verified!');
-        // Creating the user:
-            // const username = phone.slice(3);
-            // const hashed_password = bcrypt.hashSync(password, 12);
-    
-            // const token = jwt.sign({ name, phone, hashed_password }, process.env.JWT_SECRET, {expiresIn: '7d'});
-    
-            // const newUser = new User({ name, username, phone, hashed_password });
-            
-            // const savedUser = newUser.save((err, user) => {
-            //     if (err) {
-            //         return res.status(400).json({
-            //             message: 'Can\'t create user!',
-            //         });
-            //     }
-            //     res.status(201).json({
-            //         messsage: 'User created!',
-            //         user, token
-            //     });
-            // });
         });
     }
 }
