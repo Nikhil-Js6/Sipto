@@ -73,7 +73,7 @@ class AuthController {
                 });
             }
             
-            // Creating the user:
+         // Creating the user:
             const username = phone.slice(3);
             const hashed_password = bcrypt.hashSync(password, 12);
     
@@ -91,6 +91,42 @@ class AuthController {
                     messsage: 'User created!',
                     user, token
                 });
+            });
+        });
+    }
+    
+    async login(req, res) {
+
+        const { email, phone, password } = req.body;
+
+        User.findOne({ phone }).exec((err, user) => {
+
+            if(!user){
+                return res.status(401).json({
+                    message: 'User not found!'
+                });
+            }
+            if(err) {
+                return res.status(500).json({
+                    message: 'Something went wrong!'
+                });
+            }
+            
+            const validPassword = bcrypt.compareSync(password, user.hashed_password);
+
+            if(!validPassword) return res.status(401).json({
+                message: 'Wrong Credentials!',
+            });
+
+            const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+            const { _id, name, email, phone } = user;
+
+            return res.status(200).json({ 
+                message: `Hello ${name}, Login Success!`,
+                token,
+                user: {
+                    _id, name, email, phone
+                }
             });
         });
     }
