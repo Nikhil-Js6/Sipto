@@ -29,10 +29,6 @@ const userSchema = new mongoose.Schema({
         unique: true,
         lowercase: true,
         max: 32,
-    },
-    hashed_password: {
-        type: String,
-        required: true,
     }
 },
     {timestamps: true, timeseries: true},
