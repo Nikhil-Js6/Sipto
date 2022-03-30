@@ -109,7 +109,7 @@ class AuthController {
 
             if(!user){
                 return res.status(401).json({
-                    message: 'User not found!'
+                    message: `User ${filter.email ? 'Email' : 'Phone Number'} not found!`
                 });
             }
             if(err) {
@@ -124,14 +124,15 @@ class AuthController {
                 message: 'Wrong Credentials!',
             });
 
-            const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
             const { _id, name, email, phone } = user;
+            
+            const token = jwt.sign({ _id, email, phone }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
             return res.status(200).json({ 
                 message: `Hello ${name}, Login Success!`,
                 token,
                 user: {
-                    _id, name, email, phone
+                    name, email, phone
                 }
             });
         });
