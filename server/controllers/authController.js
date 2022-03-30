@@ -98,8 +98,14 @@ class AuthController {
     async login(req, res) {
 
         const { email, phone, password } = req.body;
+        
+        let filter = { email };
 
-        User.findOne({ phone }).exec((err, user) => {
+        if(!email && phone){ 
+            filter = { phone };
+        }
+
+        User.findOne({ filter }).exec((err, user) => {
 
             if(!user){
                 return res.status(401).json({
