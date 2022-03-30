@@ -11,16 +11,14 @@ app.use(cors({ origin: '*' }));
 mongoose.connect(process.env.LOCAL_DATABASE_URL);
 
 mongoose.connection.on('connected', () => {
-    console.log("Database Connected \u{1F525}");
+    console.log("Database Connected");
 });
 
 // Routes
 const authRoute = require('./routes/auth');
-// const userRoute = require('./routes/user');
 
 // MiddleWares
 app.use('/api', authRoute);
-// app.use('/api', userRoute);
 
 let port = process.env.PORT || 3300;
 
