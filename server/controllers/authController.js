@@ -103,6 +103,50 @@ class AuthController {
         });
     }
     
+    async sendLoginOtp(req, res) {
+
+        const { phone } = req.body;
+
+        User.findOne({ phone }).exec((err, user) => {
+            if(!user){
+                return res.status(401).json({
+                    message: 'User not found!'
+                });
+            }
+            if(err) {
+                return res.status(500).json({
+                    message: 'Something went wrong!'
+                });
+            }
+
+            const otp = crypto.randomInt(1000, 9999);
+
+            const token = jwt.sign({ phone, otp }, process.env.JWT_SECRET, { expiresIn: '10min' });
+
+            const params = {
+                PhoneNumber: phone,
+                Message: `Your Sipto OTP is: ${otp}`,
+            };
+            
+            const sendOtp = sns.publish(params).promise();
+
+            sendOtp
+            .then(data => {
+                console.log(`Message sent to the user: ${params.PhoneNumber}`);
+                res.status(200).json({
+                    message: `Hello ${user.name}, Your OTP has been sent to ${phone}`,
+                    token
+                });
+            })
+            .catch(err => {
+                console.error('SMS Failed!', err);
+                res.status(400).json({
+                    message: 'Could not send OTP. Please try again.'
+                });
+            });
+        });
+    }
+    
     async login(req, res) {
 
         const { phone, password } = req.body;
