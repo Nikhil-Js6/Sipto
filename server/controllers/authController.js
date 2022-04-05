@@ -103,7 +103,7 @@ class AuthController {
         });
     }
     
-    async sendLoginOtp(req, res) {
+    async sendLoginOtp (req, res) {
 
         const { phone } = req.body;
 
@@ -147,7 +147,48 @@ class AuthController {
         });
     }
     
-    async login(req, res) {
+    async verifyLoginOtp (req, res) {
+
+        const { userOtp, userToken } = req.body;
+
+        jwt.verify(userToken, process.env.JWT_SECRET, (err, user) => {
+            if (err) {
+                return res.status(401).json({
+                    message: 'OTP expired. Please try again!',
+                });
+            }
+            
+            const { phone, otp } = user;
+
+            if (otp !== +userOtp) {
+                return res.status(400).json({
+                    message: 'Please enter the correct OTP',
+                });
+            }
+
+            User.findOne({ phone }, (err, user) => {
+                if (err || !user) {
+                    return res.status(401).json({
+                        message: 'User not found!',
+                    });
+                }
+
+                const { _id, name, email, phone, hashed_password } = user;
+
+                const token = jwt.sign({ email, phone, hashed_password }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+                return res.status(200).json({ 
+                    message: `Hello ${name}, Login Success!`,
+                    user: {
+                        _id, name, email, phone
+                    },
+                    token,
+                });
+            });
+        });
+    }
+    
+    async login (req, res) {
 
         const { phone, password } = req.body;
 
